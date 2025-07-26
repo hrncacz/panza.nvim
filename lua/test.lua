@@ -6,7 +6,7 @@ local chat = {
 	input_win = nil,
 }
 
--- 🪟 Create the message window (top half)
+-- 🪟  Create the message window (top half)
 local function create_message_window()
 	local width = math.floor(vim.o.columns * 0.8)
 	local height = math.floor(vim.o.lines * 0.6)
