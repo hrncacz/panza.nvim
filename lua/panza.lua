@@ -1,21 +1,31 @@
 local M = {}
 
+local chat = require("chat")
 
 local config = {
 	root_path = "", -- root forlder of plugin folder
-	venv = "",     -- python venv folder path
-	python = "",   -- python3 venv path
-	pip = "",      -- pip venv path
+	agent_path = "", -- python agent folder path
+	venv = "",      -- python venv folder path
+	python = "",    -- python3 venv path
+	pip = "",       -- pip venv path
 }
 
-M.setup = function() -- todo
-end
 
-local install_requirements = function()
+local function install_requirements()
 	-- local output = io.popen(config.pip .. " install -r requirements.txt")
-	local output = io.popen(config.python .. " -m pip check"):read("*a")
-	print(output)
-	print("hhh")
+	-- local output = io.popen(config.python .. " -m pip check"):read("*a")
+	-- print(output)
+	-- print("hhh")
+	if vim.fn.filereadable(vim.fs.joinpath(config.root_path, "agent", "requirements.txt")) == 1 then
+		-- local output = io.popen(config.pip .. " install -r requirements.txt"):read("*a")
+		local output = io.popen(config.pip .. " show huggingface_hub"):read("*a")
+		if not vim.startswith(output, "Name") then
+			io.popen(config.pip .. " install huggingface_hub"):read("*a")
+			install_requirements()
+		else
+			print("Alles gutte")
+		end
+	end
 end
 
 local create_python_venv = function()
@@ -38,11 +48,14 @@ local test_dependencies = function()
 			break
 		end
 	end
+	config.agent_path = vim.fs.joinpath(config.root_path, "agent")
 	-- Checking existence of python venv
 	config.venv = vim.fs.joinpath(config.root_path, "agent", "venv")
 	if vim.fn.isdirectory(config.venv) == 1 then
-		config.python3 = vim.fs.joinpath(config.venv, "bin", "python3")
+		print("Assigning config paths")
+		config.python = vim.fs.joinpath(config.venv, "bin", "python3")
 		config.pip = vim.fs.joinpath(config.venv, "bin", "pip")
+		install_requirements()
 	else
 		create_python_venv()
 	end
@@ -56,9 +69,12 @@ M.load_module = function()
 		print("Error decoding json: " .. result)
 	else
 		print(result)
+		chat.main_loop(config.python, { "-u", "-i", vim.fs.joinpath(config.agent_path, "main.py") })
 	end
 end
 
 M.load_module()
 
+M.setup = function() -- todo
+end
 return M
