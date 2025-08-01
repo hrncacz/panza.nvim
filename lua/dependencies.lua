@@ -118,7 +118,7 @@ local deps_testing = {
 M.run_check = function()
 	for _, func in ipairs(deps_testing) do
 		if not func() then
-			return nil
+			return {}
 		end
 	end
 	return config

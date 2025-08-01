@@ -16,13 +16,13 @@ def main():
     logging.getLogger("transformers").setLevel(logging.ERROR)
     login(hf_api_key)
     bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,  # or load_in_8bit=True
+        load_in_4bit=True,
         bnb_4bit_compute_dtype=torch.float16,
         bnb_4bit_use_double_quant=True,
         bnb_4bit_quant_type="nf4",
     )
     device = 0 if torch.cuda.is_available() else -1
-    model_name = "teknium/OpenHermes-2.5-Mistral-7B"  # Change to your local path or HF model
+    model_name = "teknium/OpenHermes-2.5-Mistral-7B"
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
     model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", use_safetensors=True, quantization_config=bnb_config)
     generator = pipeline("text-generation", model=model, tokenizer=tokenizer)

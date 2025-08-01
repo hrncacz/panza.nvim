@@ -11,17 +11,14 @@ local dependencies = require("dependencies")
 ---@field python string: path to python inside pip_venv
 ---@field pip string: path to pip inside pip_venv
 
----@type panza.Config
 local config = {
 	root_path = "",
 	agent_path = "",
-	pip_venv = "", -- python venv folder path
+	pip_venv = "",
 	uv = "",
-	python = "",  -- python3 venv path
-	pip = "",     -- pip venv path
+	python = "",
+	pip = "",
 }
-
-
 
 ---@class panza.Options
 ---@field hf_api_key string: hugging face API key
@@ -35,7 +32,7 @@ M.load_module = function(opts)
 		return
 	end
 	config = dependencies.run_check()
-	if config == nil then
+	if config.root_path == nil then
 		print("Checking dependencies was not successful")
 	else
 		vim.api.nvim_create_user_command("OpenChat", function()
