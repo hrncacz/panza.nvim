@@ -29,6 +29,15 @@ Plug 'hrncacz/panza.nvim'
 ```lua
 require("panza").load_module({ hf_api_key = "YOUR HUGGING FACE API KEY" })
 ```
+### OR
+- Set api key as a variable
+```bash
+export HF_API_KEY="YOUR HUGGING FACE API KEY"
+```
+- And use it inside your config file
+```lua
+require("panza").load_module({ hf_api_key = os.getenv("HF_API_KEY") })
+```
 
 ## Keymaps
 
