@@ -7,7 +7,7 @@
 ## Description
 
 - AI Chat assistant
-- Runnig [OpenHermes][https://huggingface.co/teknium/OpenHermes-2.5-Mistral-7B] LLM
+- Runnig [OpenHermes](https://huggingface.co/teknium/OpenHermes-2.5-Mistral-7B) LLM
 - Quick help for beginners.
 
 
