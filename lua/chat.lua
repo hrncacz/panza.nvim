@@ -16,6 +16,12 @@ local function set_chat_default()
 	chat.input_w_buf = -1
 end
 
+local roles = {
+	assistant = "Asistant:",
+	user = "User:"
+}
+
+
 local function create_window_config(opts)
 	local opts = opts or {}
 	local width = vim.o.columns
@@ -66,7 +72,6 @@ local function parse_input(lines)
 	return vim.trim(input_text)
 end
 
-
 ---Converting response content to lines
 ---@param text any
 ---@return string[]
@@ -96,15 +101,20 @@ local function refresh()
 	local all_messages = messenger.get_all_messages()
 	local lines = {}
 	for _, message in pairs(all_messages) do
-		table.insert(lines, message.role .. ":")
+		local role = roles[message.role] or "Response:"
+		table.insert(lines, role)
 		local lines_from_text = parse_response(message.content)
 		for _, line in pairs(lines_from_text) do
 			table.insert(lines, line)
 		end
+		table.insert(lines, "")
 	end
 	vim.api.nvim_buf_set_lines(chat.chat_w_buf, 0, -1, false, lines)
-
 	vim.api.nvim_set_option_value("modifiable", false, { buf = chat.chat_w_buf })
+	if #all_messages > 0 then
+		local last_message_len = parse_response(all_messages[#all_messages].content)
+		vim.api.nvim_win_set_cursor(chat.chat_w_win, { #lines - #last_message_len, 0 })
+	end
 end
 
 local function chat_window()
@@ -145,15 +155,8 @@ local function toggle_chat()
 	end
 end
 
-local function print_chat_config()
-	print("Chat window: ", chat.chat_w_win)
-	print("Chat buffer: ", chat.chat_w_buf)
-	print("Input window: ", chat.input_w_win)
-	print("Input window: ", chat.input_w_buf)
-end
 
 local function close_chat()
-	print_chat_config()
 	if vim.api.nvim_win_is_valid(chat.chat_w_win) then
 		vim.api.nvim_win_close(chat.chat_w_win, true)
 	end
@@ -167,11 +170,12 @@ end
 
 
 ---Starting main chat window
----@param python string: path to python executable
+---@param uv string: path to uv executable
 ---@param agent string: path to agent folder
 ---@param hf_api_key string: hugging face API key
-M.start_chat = function(python, agent, hf_api_key)
-	messenger.start_process(python, { "-u", "-i", vim.fs.joinpath(agent, "main.py"), "hf_api_key=" .. hf_api_key })
+M.start_chat = function(uv, agent, hf_api_key)
+	messenger.start_process(uv,
+		{ "run", "--directory", agent, "--python", "3.11", vim.fs.joinpath(agent, "main.py"), "hf_api_key=" .. hf_api_key })
 	chat_window()
 
 	input_window()

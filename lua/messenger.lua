@@ -85,7 +85,6 @@ M.send_message = function(user_input)
 	if not status then
 		print("Error decoding json: " .. result)
 	else
-		print(result)
 		vim.loop.write(chat_proc.stdin, result .. "\n")
 		vim.api.nvim_command("ChatRefresh")
 	end
