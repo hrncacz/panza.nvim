@@ -2,34 +2,35 @@
 
 # PANZA.NVIM
 
+</div>
 
-### Description
+## Description
 
 - AI Chat assistant
 - Runnig [OpenHermes][https://huggingface.co/teknium/OpenHermes-2.5-Mistral-7B] LLM
 - Quick help for beginners.
 
 
-### Requirements
+## Requirements
 
 - Python3
 - HuggingFace API token - READ rights
 
 
-### Instalation
+## Instalation
 
 ```lua
 Plug 'hrncacz/panza.nvim'
 
 ```
 
-### Configuration
+## Configuration
 
 ```lua
 require("panza").load_module({ hf_api_key = "YOUR HUGGING FACE API KEY" })
 ```
 
-### Keymaps
+## Keymaps
 
 - There is currently only one keymap, `N` mode `<CR>` inside input window of chat will trigger `:SendMessage` command
 ```lua
@@ -37,7 +38,7 @@ vim.keymap.set("n", "<CR>", ":SendMessage<CR>", {})
 ```
 
 
-### Commands
+## Commands
 
 - `:OpenChat`
     - Opening chat and input window
@@ -56,7 +57,7 @@ vim.keymap.set("n", "<CR>", ":SendMessage<CR>", {})
     - Triggers refresh of chat window
 
 
-### ToDo
+## ToDo
 
 - [ ] Coloring of chat messages based on role
 - [ ] Adding health check
