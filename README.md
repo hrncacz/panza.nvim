@@ -15,6 +15,7 @@
 
 - Python3
 - HuggingFace API token - READ rights
+    - Get yours - https://huggingface.co/docs/hub/security-tokens
 
 
 ## Instalation
