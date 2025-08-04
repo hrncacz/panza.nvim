@@ -143,6 +143,7 @@ end
 local function reponse()
 	refresh()
 	vim.api.nvim_set_option_value("modifiable", true, { buf = chat.input_w_buf })
+	vim.api.nvim_buf_set_lines(chat.input_w_buf, 0, -1, false, {})
 end
 
 local function toggle_chat()
@@ -167,6 +168,18 @@ local function close_chat()
 	messenger.close_process()
 end
 
+local function first_run()
+	local loading_message = "Loading..."
+	if vim.api.nvim_win_is_valid(chat.chat_w_win) and vim.api.nvim_win_is_valid(chat.input_w_win) then
+		vim.api.nvim_set_option_value("modifiable", true, { buf = chat.chat_w_buf })
+		vim.api.nvim_buf_set_lines(chat.chat_w_buf, 0, -1, false, { loading_message })
+		vim.api.nvim_set_option_value("modifiable", false, { buf = chat.chat_w_buf })
+
+		vim.api.nvim_buf_set_lines(chat.input_w_buf, 0, -1, false, { loading_message })
+		vim.api.nvim_set_option_value("modifiable", false, { buf = chat.input_w_buf })
+	end
+end
+
 
 
 ---Starting main chat window
@@ -177,8 +190,8 @@ M.start_chat = function(uv, agent, hf_api_key)
 	messenger.start_process(uv,
 		{ "run", "--directory", agent, "--python", "3.11", vim.fs.joinpath(agent, "main.py"), "hf_api_key=" .. hf_api_key })
 	chat_window()
-
 	input_window()
+	first_run()
 
 	vim.api.nvim_create_user_command("ChatResponse", reponse, {}
 	)

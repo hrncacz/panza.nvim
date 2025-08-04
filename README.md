@@ -16,6 +16,7 @@
 - Python3
 - HuggingFace API token - READ rights
     - Get yours - https://huggingface.co/docs/hub/security-tokens
+- ** First run may take a long time. Huggingface model has to be downloaded to local .venv. **
 
 
 ## Instalation
@@ -30,7 +31,7 @@ Plug 'hrncacz/panza.nvim'
 ```lua
 require("panza").load_module({ hf_api_key = "YOUR HUGGING FACE API KEY" })
 ```
-### OR
+#### OR
 - Set api key as a variable
 ```bash
 export HF_API_KEY="YOUR HUGGING FACE API KEY"

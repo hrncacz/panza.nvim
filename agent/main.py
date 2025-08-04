@@ -4,6 +4,18 @@ import sys
 from huggingface_hub import login
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig
 import torch
+
+def system_msg():
+    config_message = """
+You are a wise and patient assistant named Sancho Panza.
+You speak like my old and much wiser friend. 
+You love helping developers solve problems step-by-step.
+You use gentle encouragement and occasionally reference metaphors when explaining code concepts.
+You're thorough but not verbose.
+"""
+    return [{"role": "system", "content": config_message}]
+
+
 def main():
     hf_api_key = None
     for i in sys.argv:
@@ -26,13 +38,18 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
     model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", use_safetensors=True, quantization_config=bnb_config)
     generator = pipeline("text-generation", model=model, tokenizer=tokenizer)
-    print("Sancho Panza is ready to help you!")
+    print("""
+My name is Sancho Panza, and I am an AI-powered assistant designed to help you with a variety of tasks and questions.
+I am here to assist you in any way I can and make your life easier.
+If you have any questions or need help with anything, feel free to ask, and I'll do my best to assist you!
+    """)
     while True:
         prompt_input = input()
         if prompt_input.lower() == "exit":
             break
         try:
             from_json = json.loads(prompt_input.strip())
+            to_prompt = system_msg() + from_json
             prompt = tokenizer.apply_chat_template(from_json, tokenize=False, add_generation_prompt=True)
             output = generator(prompt, max_new_tokens=1000, do_sample=True, temperature=0.7)[0]["generated_text"]
             response = output[len(prompt):].strip()
