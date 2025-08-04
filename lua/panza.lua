@@ -10,6 +10,7 @@ local dependencies = require("dependencies")
 ---@field uv string: path to uv package manager inside pip_venv
 ---@field python string: path to python inside pip_venv
 ---@field pip string: path to pip inside pip_venv
+---@field hf_api_key string: hugging face API key
 
 local config = {
 	root_path = "",
@@ -18,6 +19,7 @@ local config = {
 	uv = "",
 	python = "",
 	pip = "",
+	hf_api_key = ""
 }
 
 ---@class panza.Options
@@ -31,14 +33,16 @@ M.load_module = function(opts)
 		print("Missing hf_api_key option. Module was not loaded.")
 		return
 	end
-	config = dependencies.run_check()
-	if config.root_path == nil then
-		print("Checking dependencies was not successful")
-	else
-		vim.api.nvim_create_user_command("OpenChat", function()
-			chat.start_chat(config.uv, config.agent_path, opts.hf_api_key)
-		end, {})
-	end
+	dependencies.run_check(opts.hf_api_key)
+	-- config = dependencies.run_check()
+
+	-- if config.root_path == nil then
+	-- 	print("Checking dependencies was not successful")
+	-- else
+	-- 	vim.api.nvim_create_user_command("OpenChat", function()
+	-- 		chat.start_chat(config.uv, config.agent_path, opts.hf_api_key)
+	-- 	end, {})
+	-- end
 end
 
 return M

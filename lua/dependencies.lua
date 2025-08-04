@@ -1,5 +1,7 @@
 local M = {}
 
+local chat = require("chat")
+
 ---@type panza.Config
 local config = {
 	root_path = "",
@@ -8,6 +10,7 @@ local config = {
 	uv = "",
 	python = "",
 	pip = "",
+	hf_api_key = ""
 }
 
 local function err(msg)
@@ -77,12 +80,49 @@ local function set_pip()
 end
 
 local function install_dependencies()
-	local result = vim.fn.system({ config.uv, "run", "--python", "3.11", "--directory", config.agent_path, "deps.py" })
-	if vim.v.shell_error ~= 0 then
-		err("Installation of python dependencies was not successful")
-		return false
+	-- local result = vim.fn.system({ config.uv, "run", "--python", "3.11", "--directory", config.agent_path, "deps.py" })
+	local stdin = vim.uv.new_pipe()
+	local stdout = vim.uv.new_pipe()
+	local stderr = vim.uv.new_pipe()
+	local close_chat
+	local args = { "run", "--python", "3.11", "--directory", config.agent_path, "deps.py" }
+
+	local handle, pid = vim.uv.spawn(config.uv, {
+		args = args,
+		stdio = { stdin, stdout, strderr }
+	}, close_chat)
+
+	close_chat = function(code, signal)
+		print("Code: " .. code)
+		print("Signal: " .. signal)
+		print("Deps closing")
+		stdin:close()
+		stdout:close()
+		stderr:close()
+		handle:close()
 	end
-	return true
+	local n = 0
+	stdout:read_start(function(err_p, data)
+		assert(not err_p, err_p)
+		vim.schedule(function()
+			vim.api.nvim_create_user_command("OpenChat", function()
+				chat.start_chat(config.uv, config.agent_path, config.hf_api_key)
+			end, {})
+			handle:kill("sigterm")
+		end)
+	end)
+	stderr:read_start(function(err_p, data)
+		assert(not err_p, err_p)
+		if data then
+			handle:close()
+			err("Installation of python dependencies was not successful")
+		end
+	end)
+	-- if vim.v.shell_error ~= 0 then
+	-- 	err("Installation of python dependencies was not successful")
+	-- 	return false
+	-- end
+	-- return true
 end
 
 local function setup_uv()
@@ -99,9 +139,15 @@ end
 local function set_uv()
 	local uv_path = vim.fs.joinpath(config.pip_venv, "bin", "uv")
 	if vim.fn.filereadable(uv_path) ~= 1 then
+		vim.api.nvim_create_user_command("OpenChat", function()
+			print("Installation of dependencies ongoing...")
+		end, {})
 		return setup_uv()
 	end
 	config.uv = uv_path
+	vim.api.nvim_create_user_command("OpenChat", function()
+		chat.start_chat(config.uv, config.agent_path, config.hf_api_key)
+	end, {})
 	return true
 end
 
@@ -115,13 +161,11 @@ local deps_testing = {
 	set_uv,
 }
 
-M.run_check = function()
+M.run_check = function(hf_api_key)
+	config.hf_api_key = hf_api_key
 	for _, func in ipairs(deps_testing) do
-		if not func() then
-			return {}
-		end
+		func()
 	end
-	return config
 end
 
 return M
